@@ -1,11 +1,19 @@
-class Order
-  include Mongoid::Document
+class Order < Concerns::OdmWrapper
+  # enum side: {sell: 0, buy: 1}
+  # enum order_type: {market: 0, limit: 1}
+  ORDER_TYPES = {"0"=>"market", "1"=>"limit"}
+  SIDES = {"0"=>"sell", "1"=>"buy"}
+  STATUSES = {"0"=>"open", "1"=>"filled", "2"=>"cancelled", "3"=>"rejected"}
 
-  field :symbol, type: String
-  field :side, type: String
-  field :quantity, type: String
-  field :price, type: String
-  field :timestamp, type: String
-  field :order_type, type: String
-  field :fee, type: String
+  field :quantity, type: BigDecimal, default: 0.0
+  field :price, type: BigDecimal, default: 0.0
+  field :side, type: Integer, default: 0
+  field :order_type, type: Integer, default: 0
+  field :pair, type: String, default: ""
+  field :ecode, type: String, default: ""
+  field :status, type: Integer, default: 0
+  field :remaining_quantity, type: BigDecimal, default: 0
+  field :exchange_price, type: BigDecimal, default: 0
+
+  belongs_to :user
 end

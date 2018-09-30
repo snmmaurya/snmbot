@@ -1,0 +1,24 @@
+--------------------------------------------------------
+How to implement exchange
+  1) Create a service to place orders
+  2) Admin panel
+     Create an exchange
+
+
+
+How to implement one more bot
+  1) Admin Panel
+     Create a BOT
+  2) Add a cron to execute this bot
+--------------------------------------------------------
+
+
+--------------------------------------------------------
+CRONS
+
+A cron to fetch data and update it at every 2 second
+Coindcx::DataService.new.execute
+
+A cron to place order at every 5 second
+CoindcxService.new.execute('XRPBTC')
+--------------------------------------------------------

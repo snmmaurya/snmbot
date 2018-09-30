@@ -42,6 +42,13 @@ group :development, :test do
   gem 'capybara', '~> 2.13'
   gem 'selenium-webdriver'
   gem 'pry'
+  gem 'mongoid-rspec'
+  gem 'rspec-rails'
+  gem 'database_cleaner'
+  gem 'factory_bot_rails'
+  gem 'faker'
+  gem 'shoulda-matchers'
+  gem 'rails-controller-testing'
 end
 
 group :development do
@@ -53,7 +60,25 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
 end
 
+group :test do
+  gem 'rspec-sidekiq'
+end
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
-gem 'mongoid'
+gem 'bson_ext'
+gem 'devise'
+
+gem 'mongoid', '~> 6.0'
+
+gem 'activeadmin-mongoid', '0.7.0'
+# supprts
+gem 'ransack', github: 'activerecord-hackery/ransack'
+gem 'ransack-mongoid', github: 'activerecord-hackery/ransack-mongoid'
+gem 'kaminari-mongoid'
+
+
+gem 'whenever', require: false
+
+gem 'sidekiq'

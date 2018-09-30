@@ -1,0 +1,67 @@
+difference => 24 hight and 24 hour low
+
+diff
+
+if low and difference + 1precent
+  buy
+elsif high and difference + 1percent
+  sell
+end
+
+
+-------------------------------
+ltd = last trade price
+
+near to low
+
+buy
+
+near to hight
+
+sell
+-------------------------------
+
+XRPBTC --
+SNTBTC
+LTCBTC
+
+
+
+
+
+24hour low compare with ltd
+if differnece is 1 percent
+  buy
+end
+
+
+24hour hight compare with ltd
+if diffrence is 
+
+-------------------------------
+Cron Jobs
+
+-------------------------------
+
+
+
+LTP, HP, LP
+
+XRPBTC
+
+
+
+reslut = HP-LP
+
+if result >= 5
+
+  lowDIFF = LTP - LP
+
+  highDIFF = LTP - HP
+
+  if lowDIFF < highDIFF
+    Buy
+  else
+    Sell
+  end
+end
