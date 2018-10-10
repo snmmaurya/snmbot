@@ -1,4 +1,5 @@
 module RedisModule
+
   def self.fetch_ticker ecode, pair
     $redis.hgetall("#{ecode}##{pair}")
   end

@@ -1,66 +1,200 @@
 class Coindcx::ExecutorService
 
-  def initialize options={}
-    @key, @secret, @options = Settings.coindcx.key, Settings.coindcx.secret, options
+  def initialize bot, options={}
+    @key, @secret, @bot, @options = Settings.coindcx.key, Settings.coindcx.secret, bot options
+    @user = @bot.user
+    @btc_wallet = @bot.user.btc_wallet
+    @btc_wallet_balance = @btc_wallet.balance
   end
 
-  def execute bot, options={}
-    # logic goes here to place either limit/market
-    # if side is not present inside options
+  def negative_lies_into_data
+    first, second, third = [], [], []
 
-    options = {
-      "side" => "sell",
-      "quantity" => bot.quantity_to_sell,
-      "exchange_price" => RedisModule.fetch_current_price("DCX", bot.mcode)
-    }
-
-    btc_pairs = ["XRPBTC", "LTCBTC", "BCHBTC"]
-
-    changes = RedisModule.change_24_hour "DCX", "LTCBTC"
-    if changes lies in (-1 to -20)
-      if (-15 to -20)
-         average =  5 pairs then (15 precent of btcamount) / 5
-          PLACE BUY ORDER on average for each on price of 5th position of order book
-          (/exchange/v1/books/:market) get order book and sort get 5th position(GREEN colors)
-          remaing_balance = balance - (15 percent of balance)
-      elsif (-7 to -14)
-        average =  5 pairs then (55 precent of remaing_balance) / 5
-          PLACE BUY ORDER on average for each on price of 5th position of order book
-          (/exchange/v1/books/:market) get order book and sort get 5th position(GREEN colors)
-          remaing_balance = balance - (15 percent of balance)
-
-      elsif (-1 to -6)
-        average =  5 pairs then (30 precent of remaing_balance) / 4
-          PLACE BUY ORDER on average for each on price of 5th position of order book
-          (/exchange/v1/books/:market) get order book and sort get 5th position(GREEN colors)
-          remaing_balance = balance - (15 percent of balance)
+    @bot.algorithms.each do |algorithm|
+      change_24_hour = RedisModule.change_24_hour @bot.ecode, algorithm.mcode
+      if change_24_hour >= -20 && change_24_hour <= -15
+        first.push(algorithm.mcode)
+      elsif change_24_hour >= -14 && change_24_hour <= -7
+        second.push(algorithm.mcode)
+      elsif change_24_hour >= -6 && change_24_hour <= -1
+        third.push(algorithm.mcode)
       end
-    elsif changes > 0
-      refer order history of mine
-      (/exchange/v1/orders/trade_history)
-      xrp_btc_order
-        side: "buy"
-        price: 35
-        quantity: 100
-        
-        currenct_price = RedisModule.fetch_current_price("DCX", "XRPBTC")
-
-        percenteprice = 1.02 * price
-
-        if (1.06 * price) >= percenteprice
-          sell => 40 percent of xrp
-        elsif (1.04 * price) >= percenteprice
-          sell => 35 percent of xrp
-        elsif (1.02 * price) >= percenteprice
-          sell => 25 percent of xrp
-        end
     end
-   
-    # when to invest
 
+    return {
+      "first" => first,
+      "second" => second,
+      "third" => third
+    }
+  end
 
+  def buy_limit_order
+    lies_data = lies_into_data
 
-    place_market_order bot.mcode, options
+    if lies_data["first"].present?
+      # 15 percent of btc wallet balance
+      precente = @btc_wallet_balance * 15 / 100
+      # average quantity
+      quantity = precente / lies_data["first"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["first"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+
+    if lies_data["second"].present?
+      # 55 percent of btc wallet balance
+      precente = @btc_wallet_balance * 55 / 100
+      # average quantity
+      quantity = precente / lies_data["second"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["second"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+
+    if lies_data["third"].present?
+      # 30 percent of btc wallet balance
+      precente = @btc_wallet_balance * 30 / 100
+      # average quantity
+      quantity = precente / lies_data["third"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["third"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+  end
+
+  def poisitive_lies_into_data
+    first, second, third = [], [], []
+
+    @bot.algorithms.each do |algorithm|
+      currenct_price = RedisModule.fetch_current_price @bot.ecode, algorithm.mcode
+      price = Order.where(mcode: algorithm.mcode, side: 1).order_by(created_at: :desc).last.try(:price)
+
+      if currenct_price >= (price * 1.06)
+        first.push(algorithm.mcode)
+      elsif currenct_price >= (price * 1.04)
+        second.push(algorithm.mcode)
+      elsif currenct_price >= (price * 1.02)
+        third.push(algorithm.mcode)
+      end
+    end
+
+    return {
+      "first" => first,
+      "second" => second,
+      "third" => third
+    }
+  end
+
+  def sell_limit_order
+    #(/exchange/v1/orders/trade_history)
+    lies_data = poisitive_lies_into_data
+    
+
+    if lies_data["first"].present?
+      # 15 percent of btc wallet balance
+      precente = @btc_wallet_balance * 40 / 100
+      # average quantity
+      quantity = precente / lies_data["first"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["first"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+
+    if lies_data["second"].present?
+      # 55 percent of btc wallet balance
+      precente = @btc_wallet_balance * 55 / 100
+      # average quantity
+      quantity = precente / lies_data["second"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["second"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+
+    if lies_data["third"].present?
+      # 30 percent of btc wallet balance
+      precente = @btc_wallet_balance * 30 / 100
+      # average quantity
+      quantity = precente / lies_data["third"].count
+
+      @btc_wallet_balance = @btc_wallet_balance - precente
+
+      lies_data["third"].each do |mcode|
+        bids = JSON::parse(DcxOrderBook.find_by(mcode: mcode).data["bids"])
+        price = bids.keys[4]
+        options = {
+          "side" => "buy",
+          "quantity" => quantity,
+          "price" => price,
+          "exchange_price" => RedisModule.fetch_current_price(bot.ecode, bot.mcode)
+        }
+        place_limit_order mcode, options
+      end
+    end
+  end
+
+  def execute options={}
+    change_24_hour = RedisModule.change_24_hour @bot.ecode, algorithm.mcode
+
+    if change_24_hour >= -20 && change_24_hour <= -1
+      buy_limit_order
+    elsif change_24_hour > 0
+      sell_limit_order
+    end
   end
 
   private
@@ -69,7 +203,7 @@ class Coindcx::ExecutorService
       payload = {
         side: options["side"],
         order_type: "limit_order",
-        price_per_unit: 0.00001724,
+        price_per_unit: options["price"],
         market: mcode,
         total_quantity: options["quantity"],
         timestamp: Time.new.to_i

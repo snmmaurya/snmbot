@@ -1,4 +1,7 @@
-class Exchange < Concerns::OdmWrapper
+class Exchange
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   STATUSES = {"0"=>"active", "1"=>"inactive"}
   field :title, type: String, default: ""
   field :ecode, type: String, default: ""

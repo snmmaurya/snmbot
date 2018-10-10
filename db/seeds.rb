@@ -1,6 +1,5 @@
 AdminUser.create(email: "admin@snmbot.com", password: "Pass#147", password_confirmation: "Pass#147")
 
-
 Currency.create!(ccode: "BTC", title: "Bitcoin", status: 0)
 Currency.create!(ccode: "XRP", title: "Ripple", status: 0)
 Currency.create!(ccode: "LTC", title: "Litecoin", status: 0)
@@ -21,8 +20,19 @@ end
 coindcx = Exchange.create(title: "Coindcx", ecode: "DCX", status: 0)
 binance = Exchange.create(title: "Binance", ecode: "BNC", status: 0)
 
-dcx = Market.create(title: "XRPBTC", ecode: "DCX", exchange: coindcx, status: 0)
-bnc = Market.create(title: "XRPBTC", ecode: "BNC", exchange: binance, status: 0)
+Currency.each do |currency|
+  dcx = Market.create(title: "#{currency.ccode}BTC", mcode: "#{currency.ccode}BTC", ecode: "DCX", exchange: coindcx, status: 0)
+  bnc = Market.create(title: "#{currency.ccode}BTC", mcode: "#{currency.ccode}BTC", ecode: "BNC", exchange: binance, status: 0)
+end
 
-Bot.create(title: "Bot-XRPBTC", ecode: "DCX", pair: "XRPBTC", status: 0, min_max_different: 5, user: User.first)
-Bot.create(title: "Bot-XRPBTC", ecode: "BNC", pair: "LTCBTC", status: 1, min_max_different: 5, user: User.last)
+dcx_bot = Bot.create(title: "DCX BOT", ecode: "DCX", status: 0, user: User.first, exchange: coindcx)
+bnc_bot = Bot.create(title: "BNC BOT", ecode: "BNC", status: 1, user: User.last, exchange: binance)
+
+
+Market.where(ecode: 'DCX').each do |market|
+  dcx_bot.algorithms.create!(mcode: market.mcode, status: 0)
+end
+
+Market.where(ecode: 'BNC').each do |market|
+  bnc_bot.algorithms.create!(mcode: market.mcode, status: 0)
+end

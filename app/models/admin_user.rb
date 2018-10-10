@@ -1,4 +1,7 @@
-class AdminUser < Concerns::OdmWrapper
+class AdminUser
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   STATUSES = {"0"=>"active", "1"=>"inactive"}
   devise :database_authenticatable, :validatable
 

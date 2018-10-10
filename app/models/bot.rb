@@ -1,4 +1,7 @@
-class Bot < Concerns::OdmWrapper
+class Bot
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   STATUSES = {"0"=>"active", "1"=>"inactive"}
   field :title, type: String, default: ""
   field :ecode, type: String, default: ""
@@ -7,9 +10,7 @@ class Bot < Concerns::OdmWrapper
   field :min_max_different, type: BigDecimal, default: 0.0
   field :quantity_to_sell, type: BigDecimal, default: 0.0
   field :quantity_to_buy, type: BigDecimal, default: 0.0
-
   field :change_24_hour, type: BigDecimal, default: 0.0
-
   field :status, type: Integer, default: 0
 
   belongs_to :user

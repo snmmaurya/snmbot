@@ -1,4 +1,7 @@
-class Wallet < Concerns::OdmWrapper
+class Wallet
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   STATUSES = {"0"=>"active", "1"=>"inactive"}
 
   field :title, type: String, default: ""
@@ -8,5 +11,4 @@ class Wallet < Concerns::OdmWrapper
   field :status, type: Integer, default: 0
 
   belongs_to :user
-  index({ exchange: 1 }, {name: "wallet_user_index" })
 end

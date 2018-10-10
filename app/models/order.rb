@@ -1,4 +1,7 @@
-class Order < Concerns::OdmWrapper
+class Order
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   # enum side: {sell: 0, buy: 1}
   # enum order_type: {market: 0, limit: 1}
   ORDER_TYPES = {"0"=>"market", "1"=>"limit"}

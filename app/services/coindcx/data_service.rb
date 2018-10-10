@@ -1,11 +1,13 @@
 class Coindcx::DataService
 
-  def initialize options={}
-    @key, @secret, @options = Settings.coindcx.key, Settings.coindcx.secret, options
+  def initialize bot, options={}
+    @key, @secret= Settings.coindcx.key, Settings.coindcx.secret
+    @bot, @options  = bot, options
   end
 
   def execute options={}
     set_data(options)
+    set_order_book(options)
   end
 
   private
@@ -33,6 +35,29 @@ class Coindcx::DataService
         end
       else
         AlertService.new.action_required("DCX - could not get tickers", {message: respons_body})
+      end
+    end
+
+    def set_order_book options={}
+      @bot.algorithms.each do |algorithm|
+        headers = {'Content-Type' => 'application/json'}
+        uri = URI.parse("#{Settings.coindcx.base_url}/exchange/v1/books/#{algorithm.mcode}")
+        https = Net::HTTP.new(uri.host, uri.port)
+        https.use_ssl = true
+        request = Net::HTTP::Get.new(uri.path, headers)
+        response = https.request(request)
+        respons_body = JSON.parse(response.body)
+
+        if response.code == "200"
+          dob = DcxOrderBook.find_by mcode: algorithm.mcode
+          if dob.present?
+            dob.update!(data: {"bids" => respons_body["bids"].to_json, "asks" => respons_body["asks"].to_json})
+          else
+            dob = DcxOrderBook.create!(mcode: algorithm.mcode, data: {"bids" => respons_body["bids"].to_json, "asks" => respons_body["asks"].to_json})
+          end
+        else
+          AlertService.new.action_required("DCX - could not get order books", {message: respons_body})
+        end
       end
     end
 

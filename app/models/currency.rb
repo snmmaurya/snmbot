@@ -1,4 +1,7 @@
-class Currency < Concerns::OdmWrapper
+class Currency
+  include Mongoid::Document
+  include Mongoid::Timestamps
+
   STATUSES = {"0"=>"active", "1"=>"inactive"}
 
   field :title, type: String, default: ""
