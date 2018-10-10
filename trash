@@ -1,0 +1,42 @@
+Order.count
+
+
+RedisModule.fetch_ticker "DCX", "XRPBTC"
+
+
+Coindcx::DataWorker.perform_async()
+
+Coindcx::ExecutorWorker.perform_async(Bot.first.id)
+
+
+
+
+
+---------------------------------------------------
+cron management - 
+
+sudo service cron restart
+
+sudo service cron start
+---------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+t = RedisModule.fetch_ticker "DCX", "XRPBTC"
+ => {"change_24_hour"=>"5.759", "high"=>"0.00009369", "low"=>"0.00008453", "last_price"=>"0.00009237", "current_price"=>"0.00009127", "bid"=>"0.00009240", "ask"=>"0.00009244", "timestamp"=>"1538311864", "high_price"=>"0.00009369", "low_price"=>"0.00008453", "best_bid"=>"0.00009125", "best_ask"=>"0.00009128", "just_a_test"=>"I am an engineer"}
+
+
+
+hp = t["high_price"].to_d
+lp = t["low_price"].to_d
+cp = t["current_price"].to_d
+
+t24ch = t["change_24_hour"].to_d

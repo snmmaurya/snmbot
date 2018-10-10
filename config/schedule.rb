@@ -21,9 +21,5 @@
 
 
 every '*/1 * * * *' do
-  rake "data:coindcx"
-end
-
-every '*/1 * * * *' do
-  rake "executor:coindcx"
+  rake "coindcx:start"
 end

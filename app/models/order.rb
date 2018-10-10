@@ -9,11 +9,13 @@ class Order < Concerns::OdmWrapper
   field :price, type: BigDecimal, default: 0.0
   field :side, type: Integer, default: 0
   field :order_type, type: Integer, default: 0
-  field :pair, type: String, default: ""
+  field :mcode, type: String, default: ""
   field :ecode, type: String, default: ""
   field :status, type: Integer, default: 0
   field :remaining_quantity, type: BigDecimal, default: 0
   field :exchange_price, type: BigDecimal, default: 0
 
   belongs_to :user
+
+  index({ exchange: 1 }, {name: "order_user_index" })
 end

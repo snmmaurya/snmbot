@@ -5,12 +5,12 @@ class Coindcx::DataService
   end
 
   def execute options={}
-    set_fina_mina(options)
+    set_data(options)
   end
 
   private
 
-    def set_fina_mina options={}
+    def set_data options={}
       headers = {'Content-Type' => 'application/json'}
       uri = URI.parse("#{Settings.coindcx.base_url}#{Settings.coindcx.ticker}")
       https = Net::HTTP.new(uri.host, uri.port)
@@ -32,7 +32,7 @@ class Coindcx::DataService
           $redis.hmset(to_set)
         end
       else
-        # TODO ActionRequired
+        AlertService.new.action_required("DCX - could not get tickers", {message: respons_body})
       end
     end
 

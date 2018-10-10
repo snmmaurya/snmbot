@@ -6,5 +6,5 @@ class Algorithm < Concerns::OdmWrapper
   field :description, type: String, default: ""
   field :status, type: Integer, default: 0
 
-  belongs_to :bot
+  embedded_in :bot
 end
